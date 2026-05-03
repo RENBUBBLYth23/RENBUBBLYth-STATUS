@@ -1,60 +1,6 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-<meta charset="UTF-8">
-<title>ตรวจสอบสถานะคำสั่งซื้อ</title>
-
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f6f3ff;
-    text-align: center;
-    padding: 60px 20px;
-  }
-  h2 { color:#6a5acd; }
-  input {
-    padding:12px;
-    width:260px;
-    border-radius:12px;
-    border:1px solid #ccc;
-    font-size:16px;
-  }
-  button {
-    padding:12px 18px;
-    border:none;
-    border-radius:12px;
-    background:#6a5acd;
-    color:#fff;
-    font-size:16px;
-    cursor:pointer;
-  }
-  #result {
-    margin-top:30px;
-    background:#fff;
-    padding:20px;
-    border-radius:16px;
-    width:340px;
-    margin:auto;
-    text-align:left;
-    box-shadow:0 5px 15px rgba(0,0,0,0.1);
-  }
-</style>
-</head>
-
-<body>
-
-<h2>📦 ตรวจสอบสถานะคำสั่งซื้อ</h2>
-
-<input type="text" id="username" placeholder="กรอก @username">
-<button onclick="checkUser()">ตรวจสอบ</button>
-
-<div id="result"></div>
-
 <script>
 const SHEET_ID = "15_loykx8PlnvWioDynhbk0qH7voRj_lsu-Imzkn6AB0";
-const SHEET_NAME = encodeURIComponent("🛒สินค้าพร้อมส่ง by RENBUBBLYth🛍️");
-
-const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
+const url = `https://opensheet.elk.sh/${SHEET_ID}/1`;
 
 async function checkUser() {
   let username = document.getElementById("username").value.trim();
@@ -75,39 +21,42 @@ async function checkUser() {
     const res = await fetch(url);
     const data = await res.json();
 
-    // 🔍 หา user จากคอลัมน์จริง
-    const user = data.find(row =>
-      (row["X , Twitter ที่สามารถติดต่อได้"] || "").trim() === username
-    );
+    // 🔍 หา user (คอลัมน์ E)
+    const user = data.find(row => {
+      const val = (row["X , Twitter ที่สามารถติดต่อได้"] || "")
+        .toLowerCase()
+        .replace(/\s/g, "");
+      return val === username.toLowerCase().replace(/\s/g, "");
+    });
 
     if (!user) {
       result.innerHTML = "❌ ไม่พบข้อมูล";
       return;
     }
 
-    // 📌 ที่อยู่
+    // 📌 ที่อยู่ (F)
     const address = user["ที่อยู่การจัดส่ง"] || "-";
 
-    // 📦 สถานะ (หา column ที่มีคำว่า สถานะ)
-    let status = "-";
-    for (let key in user) {
-      if (key.includes("สถานะ")) {
-        status = user[key];
-        break;
-      }
-    }
+    // 📦 สถานะ (AC)
+    const status = user["สถานะการสั่งซื้อ"] || "-";
 
-    // 🛍️ รายการ (กรอง "ไม่รับ")
+    // 📮 เลขพัสดุ (AD)
+    const tracking = user["เลขพัสดุ"] || "-";
+
+    // 🛍️ สินค้า (H - W)
     let items = "";
     for (let key in user) {
       if (
+        key !== "ORDER NO." &&
         key !== "X , Twitter ที่สามารถติดต่อได้" &&
         key !== "ที่อยู่การจัดส่ง" &&
-        !key.includes("สถานะ") &&
+        key !== "สถานะการสั่งซื้อ" &&
+        key !== "เลขพัสดุ" &&
         key !== "ประทับเวลา" &&
         key !== "ที่อยู่อีเมล" &&
         user[key] !== "ไม่รับ" &&
-        user[key] !== ""
+        user[key] !== "" &&
+        user[key] != null
       ) {
         items += `• ${key} (${user[key]}) <br>`;
       }
@@ -115,20 +64,18 @@ async function checkUser() {
 
     result.innerHTML = `
       <b>👤 X, Twitter:</b> ${username}<br>
-      <b>📌 ที่อยู่การจัดส่ง:</b> ${address}<br><br>
+      <b>📌 ที่อยู่:</b> ${address}<br><br>
 
-      <b>🛍️ รายการสั่งซื้อ:</b><br>
+      <b>🛍️ รายการ:</b><br>
       ${items || "ไม่มีรายการ"}<br><br>
 
-      <b>📦 สถานะ:</b> ${status}
+      <b>📦 สถานะ:</b> ${status}<br>
+      <b>📮 เลขพัสดุ:</b> ${tracking}
     `;
 
   } catch (error) {
-    result.innerHTML = "❌ โหลดข้อมูลไม่สำเร็จ (เช็กว่าเปิด public แล้ว)";
+    result.innerHTML = "❌ โหลดข้อมูลไม่สำเร็จ (เช็ก public)";
     console.error(error);
   }
 }
 </script>
-
-</body>
-</html>
