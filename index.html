@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ตรวจสอบสถานะคำสั่งซื้อ</title>
+
+  <style>
+    body {
+      font-family: "Arial";
+      background: #faf7ff;
+      text-align: center;
+      padding: 60px;
+    }
+
+    h2 {
+      color: #6a5acd;
+    }
+
+    input {
+      padding: 12px;
+      width: 250px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      background: #6a5acd;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+
+    button:hover {
+      background: #5a4bcf;
+    }
+
+    #result {
+      margin-top: 30px;
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      text-align: left;
+    }
+
+    .item {
+      margin-left: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>📦 ตรวจสอบสถานะคำสั่งซื้อ</h2>
+
+<input type="text" id="username" placeholder="กรอก @username">
+<button onclick="checkUser()">ตรวจสอบ</button>
+
+<div id="result"></div>
+
+<script>
+  // 🔥 ใส่ข้อมูลตรงนี้ (แก้ได้เอง)
+  const orders = {
+    "@heaven_on_you": {
+      name: "กานพร",
+      items: {
+        "กางเกงขายาวสีดำ": "ไม่รับ",
+        "กางเกงขายาวสีเหลือง": "ไม่รับ",
+        "กางเกงขาสั้นสีดำ": "M",
+        "กางเกงขาสั้นสีเหลือง": "L",
+        "เสื้อสีดำ": "ไม่รับ",
+        "เสื้อสีเหลือง": "ไม่รับ"
+      },
+      status: "จัดส่งแล้ว"
+    },
+
+    "@p_pangsu": {
+      name: "สุริยา",
+      items: {
+        "กางเกงขายาวสีดำ": "L",
+        "กางเกงขายาวสีเหลือง": "L",
+        "กางเกงขาสั้นสีดำ": "ไม่รับ",
+        "กางเกงขาสั้นสีเหลือง": "ไม่รับ",
+        "เสื้อสีดำ": "ไม่รับ",
+        "เสื้อสีเหลือง": "ไม่รับ"
+      },
+      status: "กำลังเตรียมสินค้า"
+    }
+  };
+
+  function checkUser() {
+    let username = document.getElementById("username").value.trim();
+    let result = document.getElementById("result");
+
+    // ✨ รองรับพิมพ์ไม่ใส่ @
+    if (!username.startsWith("@")) {
+      username = "@" + username;
+    }
+
+    if (orders[username]) {
+      const data = orders[username];
+
+      let itemList = "";
+
+      for (let item in data.items) {
+        if (data.items[item] !== "ไม่รับ") {
+          itemList += `<div class="item">• ${item} (${data.items[item]})</div>`;
+        }
+      }
+
+      result.innerHTML = `
+        <b>👤 ชื่อ:</b> ${data.name}<br><br>
+        <b>🛍️ รายการสั่งซื้อ:</b><br>
+        ${itemList || "ไม่มีรายการ"}<br><br>
+        <b>📦 สถานะ:</b> ${data.status}
+      `;
+    } else {
+      result.innerHTML = "❌ ไม่พบข้อมูล";
+    }
+  }
+</script>
+
+</body>
+</html>
