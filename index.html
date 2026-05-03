@@ -12,9 +12,6 @@
     padding: 60px 20px;
   }
   h2 { color:#6a5acd; }
-  .box {
-    margin-top:20px;
-  }
   input {
     padding:12px;
     width:260px;
@@ -37,10 +34,9 @@
     padding:20px;
     border-radius:16px;
     width:340px;
-    margin-left:auto;
-    margin-right:auto;
-    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+    margin:auto;
     text-align:left;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
   }
 </style>
 </head>
@@ -49,19 +45,16 @@
 
 <h2>📦 ตรวจสอบสถานะคำสั่งซื้อ</h2>
 
-<div class="box">
-  <input type="text" id="username" placeholder="กรอก @username">
-  <button onclick="checkUser()">ตรวจสอบ</button>
-</div>
+<input type="text" id="username" placeholder="กรอก @username">
+<button onclick="checkUser()">ตรวจสอบ</button>
 
 <div id="result"></div>
 
 <script>
-const SHEET_ID = "1n0iXxWqpUv9uxei_pnMLuRD8NKvsOYZ_pcXU6J1EBMo";
-const SHEET_NAME = "สำเนาของ การตอบแบบฟอร์ม 4";
+const SHEET_ID = "15_loykx8PlnvWioDynhbk0qH7voRj_lsu-Imzkn6AB0";
+const SHEET_NAME = encodeURIComponent("🛒สินค้าพร้อมส่ง by RENBUBBLYth🛍️");
 
-// ⭐ ใช้ URL นี้เท่านั้น
-const url = `https://opensheet.elk.sh/${SHEET_ID}/${encodeURIComponent(SHEET_NAME)}`;
+const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
 
 async function checkUser() {
   let username = document.getElementById("username").value.trim();
@@ -82,9 +75,9 @@ async function checkUser() {
     const res = await fetch(url);
     const data = await res.json();
 
-    // 🔥 คอลัมน์จริงของหนู
+    // 🔍 หา user จากคอลัมน์จริง
     const user = data.find(row =>
-      row["X , Twitter ที่สามารถติดต่อได้"] === username
+      (row["X , Twitter ที่สามารถติดต่อได้"] || "").trim() === username
     );
 
     if (!user) {
@@ -92,9 +85,10 @@ async function checkUser() {
       return;
     }
 
+    // 📌 ที่อยู่
     const address = user["ที่อยู่การจัดส่ง"] || "-";
 
-    // 🔥 ดึงสถานะจากคอลัมน์ที่มีคำว่า “สถานะ”
+    // 📦 สถานะ (หา column ที่มีคำว่า สถานะ)
     let status = "-";
     for (let key in user) {
       if (key.includes("สถานะ")) {
@@ -103,8 +97,8 @@ async function checkUser() {
       }
     }
 
+    // 🛍️ รายการ (กรอง "ไม่รับ")
     let items = "";
-
     for (let key in user) {
       if (
         key !== "X , Twitter ที่สามารถติดต่อได้" &&
@@ -120,8 +114,8 @@ async function checkUser() {
     }
 
     result.innerHTML = `
-      <b>👤 X, Twitter:</b> ${username} <br>
-      <b>📌 ที่อยู่การจัดส่ง:</b> ${address} <br><br>
+      <b>👤 X, Twitter:</b> ${username}<br>
+      <b>📌 ที่อยู่การจัดส่ง:</b> ${address}<br><br>
 
       <b>🛍️ รายการสั่งซื้อ:</b><br>
       ${items || "ไม่มีรายการ"}<br><br>
@@ -130,7 +124,7 @@ async function checkUser() {
     `;
 
   } catch (error) {
-    result.innerHTML = "❌ โหลดข้อมูลไม่สำเร็จ (ตรวจว่าเปิด public แล้ว)";
+    result.innerHTML = "❌ โหลดข้อมูลไม่สำเร็จ (เช็กว่าเปิด public แล้ว)";
     console.error(error);
   }
 }
